@@ -7,7 +7,6 @@ const Responce = require('./modules/Responce');
 
 const PORT = process.env.PORT || 3000;
 
-var tokens = [];
 
 
 
@@ -19,12 +18,13 @@ MongoClient.connect('mongodb+srv://admin:Bi92ly94@cluster0-dnfdv.mongodb.net/inf
     // Success
     console.log('Connected!');
 
-    var db = client.db('infospace')
+    var db = client.db('infospace');
     
     // Running the server
     console.log('Running the server...');
     express()
     .use(bodyParser.urlencoded({ extended: false }))
+    // login
     .post('/log/', (req, res) => {
         // Error handling
         if (!req.body) {
@@ -58,7 +58,15 @@ MongoClient.connect('mongodb+srv://admin:Bi92ly94@cluster0-dnfdv.mongodb.net/inf
                 return;
             }
 
-            res.status(200).send(new Responce(200, true, {message: 'welcome', isAdmin: result[0].isAdmin}).toString());
+            let jsonInfo = {
+                message: 'welcome',  
+                name: req.body.name, 
+                date: result[0].date
+            };
+            if (result[0].isAdmin) {
+                jsonInfo.isAdmin = result[0].isAdmin;
+            }
+            res.status(200).send(new Responce(200, true, jsonInfo).toString());
         });
     })
     // registarion
@@ -82,7 +90,7 @@ MongoClient.connect('mongodb+srv://admin:Bi92ly94@cluster0-dnfdv.mongodb.net/inf
         }
 
         // Success
-        let record = {_id: sha256(name), hash: sha256(pass)};
+        let record = {_id: sha256(name), hash: sha256(pass), date: new Date()};
         if (req.body.isAdmin) 
             record.isAdmin = true;
 
