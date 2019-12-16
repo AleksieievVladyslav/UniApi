@@ -2,6 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const userRouter = require('./app/routers/user');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
+
+mongoose.connect(`mongodb+srv://admin:${process.env.MDB_PASSWORD}@cluster0-dnfdv.mongodb.net/infospace?retryWrites=true&w=majority`, { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 
 const app = express()
 .use(morgan('dev'))
