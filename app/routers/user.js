@@ -3,6 +3,7 @@ const router = express.Router();
 const sha256 = require('sha256');
 const User = require('../models/userSchema');
 
+
 router.get('/', (req, res, next) => {
     // handling errors
     if (!req.body) 
@@ -79,23 +80,24 @@ router.delete('/', (req, res, next) => {
         return res.status(400).json({ok: false, message: 'body must exist'});
 
     let name = req.body.name;
-    let pass = req.body.pass;
 
     // validating fields
     if (!name || !name.match(/^[0-9a-zA-Z]{8,16}$/) || !name.match(/[a-zA-Z]/)) 
         return res.status(400).json({ok: false, message: 'name must have from 8 to 16 and at least 1 latin character'});
-    if (!pass || !pass.match(/^[0-9a-zA-Z]{8,16}$/) || !pass.match(/[a-zA-Z]/))
-        return res.status(400).send({ok: false, message: 'password must have from 8 to 16 and at least 1 latin character'});
 
     name = sha256(name);
-    pass = sha256(pass);
 
-    User.remove({_id: name, password: pass})
+    User.remove({_id: name})
     .then(result => {
-        res.status(200).json(result);
+        if (result.deletedCount > 0) {
+            res.status(200).json({ok: true, message: 'Successfuly deleted'});
+        }
+        else {
+            res.status(304).json({ok: false, message: 'Not deleted'});
+        }
     })
     .catch(err => {
-        res.status(500).json(err);
+        res.status(500).json({ok: false, message: 'unknown error occurs'});
     })
 })
 
