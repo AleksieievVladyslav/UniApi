@@ -4,7 +4,7 @@ const sha256 = require('sha256');
 const User = require('../models/userSchema');
 
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
     // handling errors
     if (!req.body) 
         return res.status(400).json({ok: false, message: 'body must exist'});
@@ -36,10 +36,11 @@ router.get('/', (req, res, next) => {
             }
         })
         .catch((err) => {
+            console.log(err);
             return res.status(500).json({ok: false, message: "unknown error occurs"});
         })
 })
-router.post('/', (req, res, next) => {
+router.post('/', (req, res) => {
     // handling errors
     if (!req.body) 
         return res.status(400).json({ok: false, message: 'body must exist'});
@@ -69,12 +70,41 @@ router.post('/', (req, res, next) => {
     .catch((err) => {
         if (err.code === 11000)
             return res.status(400).json({ok: false, message: "user with such login is allready exits"});
-        else 
+        else  {
+            console.log(err);
             return res.status(500).json({ok: false, message: "unknown error occurs"});
+        }
     });
 
 })
-router.delete('/', (req, res, next) => {
+router.put('/', (req, res) => {
+    if (!req.body) 
+        return res.status(400).json({ok: false, message: 'body must exist'});
+
+    let name = req.body.name;
+
+    // validating fields
+    if (!name || !name.match(/^[0-9a-zA-Z]{8,16}$/) || !name.match(/[a-zA-Z]/)) 
+        return res.status(400).json({ok: false, message: 'name must have from 8 to 16 and at least 1 latin character'});
+
+    name = sha256(name);
+
+    const updateOps = {};
+    for (const key in req.body) {
+        if ('isAdmin|_id'.indexOf(key) === -1)
+            updateOps[key] = req.body[key];
+    }
+
+    User.update({ _id: name }, { $set: updateOps })
+    .then(result => {
+        res.status(200).json({ok: true, result: result});
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({ok: false, message: 'unknown error occurs'});
+    })
+})
+router.delete('/', (req, res) => {
     // handling errors
     if (!req.body) 
         return res.status(400).json({ok: false, message: 'body must exist'});
@@ -97,6 +127,7 @@ router.delete('/', (req, res, next) => {
         }
     })
     .catch(err => {
+        console.log(err);
         res.status(500).json({ok: false, message: 'unknown error occurs'});
     })
 })
