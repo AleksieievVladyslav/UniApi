@@ -25,9 +25,9 @@ exports.get_by_typeId = (req, res) => {
     .select('_id temperature pressure typeId')
     .exec()
     .then((devices) => {
-        if (!devices) return res.status(404).json({ ok: false, message: 'No devices found for provided type id'});
+        if (devices.length < 1) return res.status(404).json({ ok: false, message: 'No devices found for provided type id'});
         
-        res.status(200).json({ok: true, conunt: devices.length, data: devices});
+        res.status(200).json({ok: true, count: devices.length, data: devices});
     })
     .catch((err) => {
         console.log(err);
