@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const sha256 = require('sha256');
+// const sha256 = require('sha256');
 const User = require('../models/userSchema');
 
 
@@ -19,8 +19,8 @@ router.get('/', (req, res) => {
         return res.status(400).send({ok: false, message: 'password must have from 8 to 16 and at least 1 latin character'});
 
     // success
-    name = sha256(name);
-    pass = sha256(pass);
+    // name = sha256(name);
+    // pass = sha256(pass);
 
     User.findById(name)
         .then((user) => {
@@ -56,8 +56,8 @@ router.post('/', (req, res) => {
 
     // success
     const user = new User({
-        _id: sha256(name),
-        password: sha256(pass),
+        // _id: sha256(name),
+        // password: sha256(pass),
         date: new Date(),
         isAdmin: req.body.isAdmin
     });
@@ -87,7 +87,7 @@ router.put('/', (req, res) => {
     if (!name || !name.match(/^[0-9a-zA-Z]{8,16}$/) || !name.match(/[a-zA-Z]/)) 
         return res.status(400).json({ok: false, message: 'name must have from 8 to 16 and at least 1 latin character'});
 
-    name = sha256(name);
+    // name = sha256(name);
 
     const updateOps = {};
     for (const key in req.body) {
@@ -115,7 +115,7 @@ router.delete('/', (req, res) => {
     if (!name || !name.match(/^[0-9a-zA-Z]{8,16}$/) || !name.match(/[a-zA-Z]/)) 
         return res.status(400).json({ok: false, message: 'name must have from 8 to 16 and at least 1 latin character'});
 
-    name = sha256(name);
+    // name = sha256(name);
 
     User.remove({_id: name})
     .then(result => {

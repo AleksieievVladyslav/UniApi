@@ -1,10 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const userRouter = require('./app/routers/user');
+const typeRouter = require('./app/routers/type');
+const deviceRouter = require('./app/routers/device');
+const adminRouter = require('./app/routers/admin');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 
 mongoose.connect(`mongodb+srv://admin:${process.env.MDB_PASSWORD}@cluster0-dnfdv.mongodb.net/infospace?retryWrites=true&w=majority`, { 
+    useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -25,7 +29,10 @@ const app = express()
     next();
 })
 
+.use('/device', deviceRouter)
 .use('/user', userRouter)
+.use('/type', typeRouter)
+.use('/admin', adminRouter)
 
 //Handling error
 .use((req, res, next) => {

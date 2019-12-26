@@ -1,5 +1,6 @@
 {
     "env": {
-        "MDB_PASSWORD": "admin"
+        "MDB_PASSWORD": "admin",
+        "JWT_KEY": "secret"
     }
 }
