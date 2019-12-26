@@ -3,6 +3,24 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
+exports.get_by_id = (req, res) => {
+    const id = req.params.id;
+
+    if (id !== req.userData.adminId) return res.status(401).json({ok: false, message: 'You do not have access to do this'});
+
+    Admin.findById(id)
+    .select('email groupname description')
+    .exec()
+    .then((admin) => {
+        if (!admin) return res.status(404).json({ ok: false, message: 'No admins found for provided id'});
+        
+        res.status(200).json({ok: true, data: admin});
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({ok: false, error: err});
+    })
+}
 exports.signup = (req, res) => {
     Admin.find({email: req.body.email})
     .exec()
@@ -63,8 +81,35 @@ exports.signin = (req, res) => {
         res.status(500).json({ok: false, message: 'unknown error occurs'});
     })
 }
+exports.patch = (req, res) => {
+    const id = req.params.id;
+
+    if (id !== req.userData.adminId) return res.status(401).json({ok: false, message: 'You do not have access to do this'});
+
+    const updateOps = {};
+    for (const ops of req.body) {
+        if (ops.propName == '_id' || ops.propName == 'mail') continue;
+        if (ops.propName == 'password') {
+            updateOps[ops.propName] = crypto.pbkdf2Sync(ops.value, 'salt', 10, 64, 'sha512');
+            continue;
+        }
+        updateOps[ops.propName] = ops.value;
+    }
+    
+    Admin.updateOne({ _id: id}, { $set: updateOps })
+    .exec()
+    .then(result => {
+        res.status(200).json({ok: true, message: 'The admin successfully updated', data: result})
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({ok: false, error: err});
+    })
+}
 exports.delete = (req, res) => {
-    Admin.remove({ _id: req.params.id })
+    if (req.params.id !== req.userData.adminId) return res.status(401).json({ok: false, message: 'You do not have access to do this'});
+
+    Admin.deleteOne({ _id: req.params.id })
     .exec()
     .then(result => {
         res.status(200).json({

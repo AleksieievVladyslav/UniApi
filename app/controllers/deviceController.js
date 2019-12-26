@@ -93,7 +93,7 @@ exports.patch = (req, res) => {
 exports.delete = (req, res) => {
     const id = req.params.id;
     
-    Device.remove({ _id: id })
+    Device.deleteOne({ _id: id })
     .exec()
     .then(result => {
         res.status(200).json({ok: true, message: 'The device successfully deleted', data: result})

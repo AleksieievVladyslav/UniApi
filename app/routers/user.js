@@ -117,7 +117,7 @@ router.delete('/', (req, res) => {
 
     // name = sha256(name);
 
-    User.remove({_id: name})
+    User.deleteOne({_id: name})
     .then(result => {
         if (result.deletedCount > 0) {
             res.status(200).json({ok: true, message: 'Successfuly deleted'});
