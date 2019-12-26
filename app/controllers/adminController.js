@@ -22,10 +22,13 @@ exports.get_by_id = (req, res) => {
     })
 }
 exports.signup = (req, res) => {
+    if (!req.body.password || !req.body.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/))
+        return res.status(400).json({ok: false, message: 'Minimum 8 characters, maximum 16, at least one uppercase letter, one lowercase letter and one number'});
+        
     Admin.find({email: req.body.email})
     .exec()
     .then(admin => {
-        if (admin.length > 0) return res.status(409).json({ok: false, message: 'Admin with provided mail is already exists'});
+        if (admin.length > 0) return res.status(409).json({ok: false, message: 'Admin with provided email is already exists'});
 
         const newadmin = new Admin({
             _id: new mongoose.Types.ObjectId(),
@@ -47,7 +50,7 @@ exports.signup = (req, res) => {
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({ok: false, message: 'unknown error occurs'});
+            res.status(500).json({ok: false, error: err});
         })
     })
 
@@ -78,7 +81,7 @@ exports.signin = (req, res) => {
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({ok: false, message: 'unknown error occurs'});
+        res.status(500).json({ok: false, error: err});
     })
 }
 exports.patch = (req, res) => {
@@ -88,7 +91,7 @@ exports.patch = (req, res) => {
 
     const updateOps = {};
     for (const ops of req.body) {
-        if (ops.propName == '_id' || ops.propName == 'mail') continue;
+        if (ops.propName == '_id' || ops.propName == 'email') continue;
         if (ops.propName == 'password') {
             updateOps[ops.propName] = crypto.pbkdf2Sync(ops.value, 'salt', 10, 64, 'sha512');
             continue;
@@ -120,6 +123,6 @@ exports.delete = (req, res) => {
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({ok: false, message: 'unknown error occurs'});
+        res.status(500).json({ok: false, error: err});
     })
 }
