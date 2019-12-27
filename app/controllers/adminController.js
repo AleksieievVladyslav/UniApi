@@ -22,8 +22,8 @@ exports.get_by_id = (req, res) => {
     })
 }
 exports.signup = (req, res) => {
-    if (!req.body.password || !req.body.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/))
-        return res.status(400).json({ok: false, message: 'Minimum 8 characters, maximum 16, at least one uppercase letter, one lowercase letter and one number'});
+    // if (!req.body.password || !req.body.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/))
+        // return res.status(400).json({ok: false, message: 'Minimum 8 characters, maximum 16, at least one uppercase letter, one lowercase letter and one number'});
         
     Admin.find({email: req.body.email})
     .exec()
@@ -53,8 +53,6 @@ exports.signup = (req, res) => {
             res.status(500).json({ok: false, error: err});
         })
     })
-
-    
 }
 exports.signin = (req, res) => {
     Admin.findOne({ email: req.body.email })

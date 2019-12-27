@@ -2,44 +2,14 @@ const express = require('express');
 const router = express.Router();
 // const sha256 = require('sha256');
 const User = require('../models/userSchema');
+const userController = require('../controllers/userController');
+const checkAuth = require('../middleware/check-auth');
 
 
-router.get('/', (req, res) => {
-    // handling errors
-    if (!req.body) 
-        return res.status(400).json({ok: false, message: 'body must exist'});
-
-    let name = req.query.name;
-    let pass = req.query.pass;
-
-    // validating fields
-    if (!name || !name.match(/^[0-9a-zA-Z]{8,16}$/) || !name.match(/[a-zA-Z]/)) 
-        return res.status(400).json({ok: false, message: 'name must have from 8 to 16 and at least 1 latin character'});
-    if (!pass || !pass.match(/^[0-9a-zA-Z]{8,16}$/) || !pass.match(/[a-zA-Z]/))
-        return res.status(400).send({ok: false, message: 'password must have from 8 to 16 and at least 1 latin character'});
-
-    // success
-    // name = sha256(name);
-    // pass = sha256(pass);
-
-    User.findById(name)
-        .then((user) => {
-            if (user) {
-                if (user.password == pass) {
-                    res.status(200).json({ok: true, data: {date: user.date, isAdmin: user.isAdmin}});
-                } else {
-                    res.status(400).json({ok: false, message: "Incorrect password"});
-                }
-            }
-            else {
-                res.status(404).json({ok: false, message: 'user with such name is not found'});
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-            return res.status(500).json({ok: false, message: "unknown error occurs"});
-        })
-})
+router.post('/signup', userController.signup);
+router.post('/signin', userController.signin);
+router.get('/byId/:id', checkAuth, userController.get_by_id);
+router.get('/byAdminId/:id', checkAuth, userController.get_by_adminId);
 router.post('/', (req, res) => {
     // handling errors
     if (!req.body) 
